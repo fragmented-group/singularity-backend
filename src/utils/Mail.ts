@@ -7,6 +7,11 @@ Your email has been used to register on <a href="https://fragmented.group">.
 
 If you're that certain somebody, click (or tap) this link on the same device to continue: <a href="{link}">{link}</a>`
 
+const VERIFY_EMAIL_SUCCESS_TEMPLATE = `Hey {username}!
+Your account registration & verification was a success!
+Login at <a href="https://fragmented.group">fragmented.group</a> and get started using your account.
+`
+
 export async function sendMail(to: string, subject: string, html: string) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY!)
   sgMail
@@ -53,4 +58,8 @@ export async function sendEmailVerification(
 
 export function verifyEmailTemplate(username: string, link: string) {
   return replaceTemplate(VERIFY_EMAIL_TEMPLATE, { username, link })
+}
+
+export function verifyEmailSuccessTemplate(username: string) {
+  return replaceTemplate(VERIFY_EMAIL_SUCCESS_TEMPLATE, { username })
 }

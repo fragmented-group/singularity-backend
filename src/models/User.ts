@@ -7,7 +7,13 @@ const UserSchema: Schema = new Schema({
     required: true,
     unique: true
   },
-  password: String
+  password: String,
+  verificationToken: {
+    type: String,
+    required: true
+  },
+  emailVerified: Boolean,
+  joinedAt: Date
 })
 
 export default mongoose.model('user', UserSchema)
