@@ -4,6 +4,7 @@ import User from '../models/User'
 import 'dotenv/config'
 import express, { Router } from 'express'
 import { verifyEmailSuccessTemplate, sendEmailVerification, sendMail } from '../utils/Mail'
+import Session from '../models/Session'
 
 const UsersRouter = Router()
 UsersRouter.use(express.json())
@@ -61,16 +62,59 @@ UsersRouter.route('/verify').get(async (req, res) => {
     verificationToken: req.query.token,
     emailVerified: false,
   }).exec()
-  if (!user) return res.send('Could not find a user with that verification key. Perhaps your account is already verified?')
+  if (!user[0]) return res.send('Could not find a user with that verification key. Perhaps your account is already verified?')
   user[0].emailVerified = true
   await user[0].save()
   await sendMail(
-    user[0].email,
+    user[0].email, 
     'Your email was successfully verified, thank you for using our service!',
     verifyEmailSuccessTemplate(user[0].name)
   )
   return res.send('Your email was successfully verified!')
-  
+})
+
+UsersRouter.route('/login').post(async (req, res) => {
+  let errors: Array<String> = []
+  if (!req.body) return errors.push('Invalid body')
+  if (!req.body.username) return errors.push('Invalid username')
+  if (!req.body.password) return errors.push('Invalid password')
+  if (errors.length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'errors',
+      errors
+    })
+  }
+  let user = await User.find({
+    name: req.body.username,
+  }).exec()
+  if (!user[0]) errors.push('Invalid user')
+  let comparison = bcrypt.compareSync(req.body.password, user[0].password)
+  if (!comparison) {
+    return res.status(400).json({
+      success: false,
+      message: 'errors',
+      errors: ['Invalid username/password'],
+    })
+  }
+  if (!user[0].emailVerified) {
+    return res.status(400).json({
+      success: false,
+      message: 'errors',
+      errors: ['Your account isn\'t email verified, please check your email.'],
+    })
+  }
+  const sessionToken = 'Bearer ' + crypto.randomBytes(96).toString('base64')
+  let session = new Session({
+    sessionString: sessionToken,
+    userId: user[0]._id
+  })
+  await session.save()
+  return res.status(200).json({
+    success: true,
+    message: 'Successfully logged in!',
+    session: session.sessionString
+  })
 })
 
 
