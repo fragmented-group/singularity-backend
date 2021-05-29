@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt'
+import argon2, { argon2id } from 'argon2'
 import crypto from 'crypto'
 import User from '../models/User'
 import 'dotenv/config'
@@ -35,7 +35,9 @@ UsersRouter.route('/register').post(async (req, res) => {
       errors
     })
   }
-  const hashedPassword = bcrypt.hashSync(req.body.password, 12)
+  const hashedPassword = await argon2.hash(req.body.password, {
+    type: argon2id,
+  })
   let user = new User({
     name: req.body.username,
     email: req.body.email,
@@ -89,7 +91,9 @@ UsersRouter.route('/login').post(async (req, res) => {
     name: req.body.username,
   }).exec()
   if (!user[0]) errors.push('Invalid user')
-  let comparison = bcrypt.compareSync(req.body.password, user[0].password)
+  let comparison = await argon2.verify(user[0].password, req.body.password, {
+    type: argon2id,
+  })
   if (!comparison) {
     return res.status(400).json({
       success: false,
