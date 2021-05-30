@@ -1,6 +1,6 @@
 import { 
   RootRouter,
-  UsersRouter
+  AuthRouter
  } from './routes'
 import db from './database'
 import User from './models/User'
@@ -23,6 +23,6 @@ app.use(
 new db()
 
 app.use('/', RootRouter)
-app.use('/users', UsersRouter)
+app.use('/auth', AuthRouter)
 
 app.listen(process.env.PORT, () => console.log('Listening on port', process.env.PORT))

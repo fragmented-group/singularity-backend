@@ -1,7 +1,7 @@
-import RootRouter from './RootRouter'
-import UsersRouter from './UsersRouter'
+import RootRouter from './Root'
+import AuthRouter from './Auth'
 
 export {
   RootRouter,
-  UsersRouter
+  AuthRouter
 }

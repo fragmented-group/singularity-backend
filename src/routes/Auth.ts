@@ -6,13 +6,13 @@ import express, { Router } from 'express'
 import { verifyEmailSuccessTemplate, sendEmailVerification, sendMail } from '../utils/Mail'
 import Session from '../models/Session'
 
-const UsersRouter = Router()
-UsersRouter.use(express.json())
+const AuthRouter = Router()
+AuthRouter.use(express.json())
 
 const usernameRegex = /^[a-z0-9]+$/i
 const emailRegex = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/
 
-UsersRouter.route('/register').post(async (req, res) => {
+AuthRouter.route('/register').post(async (req, res) => {
   let errors = []
   if (!req.body) errors.push('No body')
   if (!req.body.username) errors.push('You must supply a username')
@@ -58,7 +58,7 @@ UsersRouter.route('/register').post(async (req, res) => {
   )
 })
 
-UsersRouter.route('/verify').get(async (req, res) => {
+AuthRouter.route('/verify').get(async (req, res) => {
   if (!req.query.token) return res.send('You did not provide an email verification token.')
   let user = await User.find({
     verificationToken: req.query.token,
@@ -75,7 +75,7 @@ UsersRouter.route('/verify').get(async (req, res) => {
   return res.send('Your email was successfully verified!')
 })
 
-UsersRouter.route('/login').post(async (req, res) => {
+AuthRouter.route('/login').post(async (req, res) => {
   let errors: Array<String> = []
   if (!req.body) return errors.push('Invalid body')
   if (!req.body.username) return errors.push('Invalid username')
@@ -122,4 +122,4 @@ UsersRouter.route('/login').post(async (req, res) => {
 })
 
 
-export default UsersRouter
+export default AuthRouter
